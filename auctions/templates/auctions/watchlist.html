@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>Your watchlist</h2>
+    {% if not auctions %}
+    <div>Your watchlist is empty.</div>
+    {% endif %}
+    {% for auction in auctions %}
+        <a class="auction" href="{% url 'listing' auction.title %}">
+            <div class="img">
+                <img src="{{ auction.picture }}" alt="Flying car" class="product_picture"> 
+            </div>
+            
+            <div class="product">
+                <div class ="title">{{ auction.title }}</div>
+                {% if auction.last_bid == None %}
+                <div class="price">Price: {{ auction.starting_price }} €</div>
+                {% else %}
+                <div class="price">Price: {{ auction.last_bid.bid }} €</div>
+                <div class="bid_info">Last bid by {{ auction.last_bid.user.username }} at {{ auction.last_bid.date }}</div>
+                {% endif %}
+                <div class="description">Description:<br>{{ auction.description }}</div>
+                <div class="user">Added by {{ auction.user }}</div>
+                <div class="category">Category: {{ auction.category }}</div>
+            </div>
+            {% if auction.closed %}
+            <div class="closed">
+                <img src="{% static 'auctions/closed-logo.png' %}" alt="closed" class="closed_picture">
+            </div>
+            {% endif %}
+        </a>
+    {% endfor %}
+
+{% endblock %}

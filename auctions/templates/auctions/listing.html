@@ -1,0 +1,93 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    
+        <div class="row">
+            <div class="col-5">
+                <img src="{{ auction.picture }}" class="listing_image""> 
+            </div>
+            <div class="col-5">
+                <h1 style="color:black;">{{ auction.title }}</h1>
+                {% if auction.last_bid == None %}
+                <div class="price">Price: {{ auction.starting_price }} €</div>
+                {% else %}
+                <div class="price">Price: {{ auction.last_bid.bid }} €</div>
+                <div class="bid_info">Last bid by {{ auction.last_bid.user.username }} at {{ auction.last_bid.date }}</div>
+                {% endif %}
+                <div class="description">Description:<br>{{ auction.description }}</div>
+                <div class="category">Category: {{ auction.category }}</div>
+            </div>
+            <div class="col">
+                {% if auction.closed %}
+                    <div class="winner_msg">{{ auction.last_bid.user.username }} won this listing ! Congratulations !</div>
+                {% else %}
+                    {% if errorBid %}
+                        <div class="errorBid">You need to add a higher bid</div>
+                    {% elif errorBid2 %}
+                    <div class="errorBid">You need to sign in to add a bid</div>
+                    {% endif %}
+                    <form action="{% url 'listing' auction.title %}" method="post">
+                        {% csrf_token %}
+                        <div class="add_bid">Add bid:</div>
+                        <div class="fieldWrapper">
+                            {{ bid_form }}
+                        </div>
+                        <input type="submit" value="Submit">
+                    </form>
+                    <br>
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'listing' auction.title %}" method="post">
+                        {% csrf_token %}
+                        {% if in_watchlist %}
+                            <button type="submit" class="btn btn-danger">Remove from watchlist</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-success">Add to watchlist</button>
+                        {% endif %}
+                    </form>    
+                    {% if auction.user == user.username and auction.closed == False %}
+                    <br>
+                    <form action="{% url 'listing' auction.title %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" name="close">Close this auction</button>
+                    </form> 
+                    {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <hr style="background-color: rgb(77, 72, 72);">
+        <div class="row">
+            <div class="col-6">
+                <h3 class="title_comment">Comments:</h3>
+                <div class="comment_section">
+                    {% for comment in comments %}
+                    <div class="comment">
+                        <div class="title">{{ comment.title }}</div>
+                        <div class="author">by {{ comment.user }} on {{ comment.date }}</div>
+                        <div class="text">{{ comment.text }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-6">
+                <h3>Add a comment:</h3>
+                {% if errorComment %}
+                    <div class="errorComment">You need to be sign in to add a comment</div>
+                {% endif %}
+                <form action="{% url 'listing' auction.title %}" method="post">
+                    {% csrf_token %}
+                    <div clas="fieldWrapper">
+                        {% for field in comment_form %}
+                            <div class="fieldWrapper">
+                                {{ field.errors }}
+                                {{ field.label_tag }} <br>
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        </div>
+        
+{% endblock %}
